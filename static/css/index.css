@@ -1,0 +1,517 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Background with image and overlay */
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: url('/static/images/bg.png') center/cover no-repeat;
+}
+
+.background-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  margin: 8px;
+  border-radius: 8px;
+  overflow: hidden; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  background: linear-gradient(to right, #ffffff, #e0e0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.user-menu {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn-secondary {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-logout {
+  padding: 10px 20px;
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.btn-logout:hover {
+  background: rgba(255, 107, 107, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Panel Selection Section */
+.panel-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 120px 0 80px;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Glass morphism card */
+.glass-card {
+  width: 85%;
+  max-width: 800px;
+  padding: 2.5rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.card-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #ffffff, #e0e0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  color: #e0e0ff;
+}
+
+/* Panels Grid */
+.panels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.panel-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.panel-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.panel-card:hover::before {
+  opacity: 1;
+}
+
+.panel-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panel-icon svg {
+  width: 30px;
+  height: 30px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.panel-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.panel-card p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+}
+
+.panel-arrow {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.panel-card:hover .panel-arrow {
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.panel-arrow svg {
+  width: 16px;
+  height: 16px;
+  color: white;
+}
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  min-width: 250px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.toast.info {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.toast-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.toast-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .glass-card {
+    max-width: 700px;
+    padding: 2rem;
+  }
+  
+  .panels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .header-content {
+    padding: 12px 0;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  h1 {
+    font-size: 1.3rem;
+  }
+  
+  .user-menu {
+    gap: 8px;
+  }
+  
+  .btn-secondary, .btn-logout {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .panel-selection {
+    padding: 100px 0 60px;
+  }
+  
+  .glass-card {
+    width: 90%;
+    padding: 1.5rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1.6rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .panels-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .panel-card {
+    padding: 1.2rem;
+  }
+  
+  .panel-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .panel-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .panel-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .panel-card p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+  
+  .glass-card {
+    width: 95%;
+    padding: 1.2rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .panel-card {
+    padding: 1rem;
+  }
+  
+  .panel-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .panel-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .panel-card h3 {
+    font-size: 1rem;
+  }
+  
+  .panel-card p {
+    font-size: 0.8rem;
+  }
+  
+  .panel-arrow {
+    width: 25px;
+    height: 25px;
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .panel-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .toast {
+    min-width: auto;
+  }
+}
+
+/* Animation for card appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.panel-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.panel-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.panel-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.panel-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.panel-card:nth-child(4) {
+  animation-delay: 0.4s;
+}

@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sign Up</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/signup.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <main class="glass-card">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">restaurants Menu System</p>
+    </div>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <div class="input-container">
+          <input type="text" id="name" placeholder="Full name" required />
+          <div class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-container">
+          <input type="email" id="email" placeholder="Email" required />
+          <div class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-container">
+          <input type="password" id="password" placeholder="Password" required minlength="6" />
+          <div class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="signupBtn">
+        <span class="btn-text">Sign Up</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+
+    <p class="signin-link">Already have an account? <a href="/signin">Sign in</a></p>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Firebase v10 modular via CDN (compat isn't used here) -->
+  <script type="module">
+    // TODO: Replace with your Firebase config from project settings
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById("signupForm");
+    const signupBtn = document.getElementById("signupBtn");
+    const toastContainer = document.getElementById("toastContainer");
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      // Set loading state
+      signupBtn.disabled = true;
+      signupBtn.classList.add('loading');
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        showToast("Creating account...", 'info');
+        // Create user in Firebase Auth
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const user = cred.user;
+
+        // Get ID token (JWT)
+        const idToken = await user.getIdToken();
+
+        // Send name to backend to create users/<uid> document securely
+        const res = await fetch("/api/create_user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + idToken
+          },
+          body: JSON.stringify({ name })
+        });
+
+        const j = await res.json();
+        if (!res.ok) {
+          showToast("Server error: " + (j.error || res.statusText), 'error');
+          // Reset loading state on error
+          signupBtn.disabled = false;
+          signupBtn.classList.remove('loading');
+          return;
+        }
+
+        showToast("Account created successfully!", 'success');
+        // Redirect to signed-in area/dashboard (implement as needed)
+        setTimeout(() => window.location.href = "/", 900);
+      } catch (err) {
+        showToast(err.message || String(err), 'error');
+        // Reset loading state on error
+        signupBtn.disabled = false;
+        signupBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/profile.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <main class="glass-card">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">Your Profile</p>
+    </div>
+
+    <div class="profile-container">
+      <div class="profile-avatar">
+        <div class="avatar-circle skeleton"></div>
+      </div>
+      
+      <div id="profileContent" class="profile-details">
+        <!-- Skeleton loading structure -->
+        <div class="skeleton-item">
+          <div class="skeleton-icon skeleton"></div>
+          <div class="skeleton-info">
+            <div class="skeleton-label skeleton"></div>
+            <div class="skeleton-value skeleton"></div>
+          </div>
+        </div>
+        
+        <div class="skeleton-item">
+          <div class="skeleton-icon skeleton"></div>
+          <div class="skeleton-info">
+            <div class="skeleton-label skeleton"></div>
+            <div class="skeleton-value skeleton"></div>
+          </div>
+        </div>
+        
+        
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+       Home
+      </a>
+      <button id="signOut" class="btn-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="btn-text">Sign out</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    // same firebaseConfig
+    const firebaseConfig = {
+     apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const profileContent = document.getElementById("profileContent");
+    const signOutBtn = document.getElementById("signOut");
+    const toastContainer = document.getElementById("toastContainer");
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // not signed in
+        window.location.href = "/signin";
+        return;
+      }
+
+      // Get fresh ID token
+      try {
+        const idToken = await user.getIdToken(/* forceRefresh */ true);
+        const res = await fetch("/api/get_user", {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + idToken
+          }
+        });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to load profile: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        const userDoc = await res.json();
+        // Render user details in a more visually appealing way
+        profileContent.innerHTML = `
+          <div class="form-group">
+            <div class="input-container">
+              <input type="text" value="${userDoc.name || '-'}" readonly />
+              <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="input-container">
+              <input type="email" value="${userDoc.email || '-'}" readonly />
+              <div class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          
+          
+          
+        `;
+        
+        // Update avatar
+        const avatarCircle = document.querySelector('.avatar-circle');
+        avatarCircle.classList.remove('skeleton');
+        avatarCircle.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        `;
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    });
+
+    signOutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      
+      // Set loading state
+      signOutBtn.disabled = true;
+      signOutBtn.classList.add('loading');
+      
+      try {
+        await signOut(auth);
+        showToast("Signed out successfully", 'success');
+        setTimeout(() => window.location.href = "/signin", 1000);
+      } catch (err) {
+        showToast("Sign out error: " + err.message, 'error');
+        // Reset loading state on error
+        signOutBtn.disabled = false;
+        signOutBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>
