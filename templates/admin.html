@@ -1,1 +1,328 @@
-This is Admin Panel
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Panel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Loading admin panel...</p>
+  </div>
+  
+  <main id="mainContent" class="glass-card" style="display: none;">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">Admin Panel</p>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-avatar">
+        <div class="avatar-circle skeleton"></div>
+      </div>
+      
+      <div class="admin-details">
+        <div class="admin-name skeleton-text skeleton"></div>
+        <div class="admin-email skeleton-text skeleton"></div>
+      </div>
+    </div>
+
+    <!-- New Card-Based Options -->
+    <div class="options-container">
+      <div class="option-card" data-href="/user_manage">
+        <div class="option-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3>Manage Users</h3>
+        <p>Assign roles to users and manage their access.</p>
+      </div>
+
+      <div class="option-card" data-href="/manage_products">
+        <div class="option-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h3>Manage Products</h3>
+        <p>Add, edit, or remove menu items.</p>
+      </div>
+
+      <div class="option-card" data-href="/manage_categories">
+        <div class="option-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <h3>Manage Categories</h3>
+        <p>Organize your menu items into categories.</p>
+      </div>
+
+      <div class="option-card" data-href="coming-soon">
+        <div class="option-card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2l6 9-6 9V2z"/>
+            <path d="M21 12H9"/>
+          </svg>
+        </div>
+        <h3>Manage Orders</h3>
+        <p>View and process customer orders.</p>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+       Home
+      </a>
+      <button id="signOut" class="btn-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="btn-text">Sign out</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </main>
+
+  <div id="errorScreen" class="error-screen" style="display: none;">
+    <div class="error-container">
+      <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h2>Access Denied</h2>
+      <p id="errorMessage">You don't have permission to access this panel.</p>
+      <button id="goHome" class="btn-primary">Go to Home</button>
+    </div>
+  </div>
+
+  <!-- Coming Soon Modal -->
+  <div id="comingSoonModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <h2>Coming Soon</h2>
+      </div>
+      <p>This feature is under development and will be available in a future update.</p>
+      <button id="closeModal" class="btn-primary">Got it</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    // same firebaseConfig
+    const firebaseConfig = {
+     apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loadingScreen = document.getElementById("loadingScreen");
+    const mainContent = document.getElementById("mainContent");
+    const errorScreen = document.getElementById("errorScreen");
+    const errorMessage = document.getElementById("errorMessage");
+    const signOutBtn = document.getElementById("signOut");
+    const toastContainer = document.getElementById("toastContainer");
+    const goHomeBtn = document.getElementById("goHome");
+    const optionCards = document.querySelectorAll('.option-card');
+    const comingSoonModal = document.getElementById('comingSoonModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Go home button
+    goHomeBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+
+    // Handle option card clicks
+    optionCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const href = card.getAttribute('data-href');
+        if (href && href !== 'coming-soon') {
+          window.location.href = href;
+        } else {
+          comingSoonModal.style.display = 'flex';
+        }
+      });
+    });
+
+    // Close modal
+    closeModalBtn.addEventListener('click', () => {
+      comingSoonModal.style.display = 'none';
+    });
+
+    // Close modal on background click
+    comingSoonModal.addEventListener('click', (e) => {
+      if (e.target === comingSoonModal) {
+        comingSoonModal.style.display = 'none';
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // not signed in
+        window.location.href = "/signin";
+        return;
+      }
+
+      // Get fresh ID token
+      try {
+        const idToken = await user.getIdToken(/* forceRefresh */ true);
+        const res = await fetch("/api/get_user", {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + idToken
+          }
+        });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          errorMessage.textContent = "Failed to load profile: " + (j.error || res.statusText);
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+
+        const userDoc = await res.json();
+        
+        // Check if user has admin role
+        if (userDoc.role !== 'admin') {
+          errorMessage.textContent = "Access denied: Admin role required";
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+        
+        // Update admin details
+        document.querySelector('.admin-name').textContent = userDoc.name || '-';
+        document.querySelector('.admin-email').textContent = userDoc.email || '-';
+        
+        // Remove skeleton loading
+        document.querySelector('.admin-name').classList.remove('skeleton');
+        document.querySelector('.admin-email').classList.remove('skeleton');
+        document.querySelector('.avatar-circle').classList.remove('skeleton');
+        
+        // Update avatar
+        const avatarCircle = document.querySelector('.avatar-circle');
+        avatarCircle.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        `;
+        
+        // Hide loading screen and show main content
+        loadingScreen.style.display = "none";
+        mainContent.style.display = "flex";
+      } catch (e) {
+        errorMessage.textContent = "Error: " + e.message;
+        loadingScreen.style.display = "none";
+        errorScreen.style.display = "flex";
+      }
+    });
+
+    signOutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      
+      // Set loading state
+      signOutBtn.disabled = true;
+      signOutBtn.classList.add('loading');
+      
+      try {
+        await signOut(auth);
+        showToast("Signed out successfully", 'success');
+        setTimeout(() => window.location.href = "/signin", 1000);
+      } catch (err) {
+        showToast("Sign out error: " + err.message, 'error');
+        // Reset loading state on error
+        signOutBtn.disabled = false;
+        signOutBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

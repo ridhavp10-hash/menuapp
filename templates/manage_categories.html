@@ -1,0 +1,453 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Manage Categories</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/manage_categories.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Loading categories...</p>
+  </div>
+  
+  <main id="mainContent" class="glass-card" style="display: none;">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">Manage Categories</p>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-avatar">
+        <div class="avatar-circle skeleton"></div>
+      </div>
+      
+      <div class="admin-details">
+        <div class="admin-name skeleton-text skeleton"></div>
+        <div class="admin-email skeleton-text skeleton"></div>
+      </div>
+    </div>
+
+    <div class="categories-container">
+      <div class="categories-header">
+        <h2>Categories</h2>
+        <button id="addCategoryBtn" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Category
+        </button>
+      </div>
+      
+      <div class="categories-list" id="categoriesList">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/admin" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+       Admin Panel
+      </a>
+      <button id="signOut" class="btn-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="btn-text">Sign out</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </main>
+
+  <div id="errorScreen" class="error-screen" style="display: none;">
+    <div class="error-container">
+      <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h2>Access Denied</h2>
+      <p id="errorMessage">You don't have permission to access this panel.</p>
+      <button id="goHome" class="btn-primary">Go to Home</button>
+    </div>
+  </div>
+
+  <!-- Category Form Modal -->
+  <div id="categoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Category</h2>
+        <button id="closeModal" class="close-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form id="categoryForm" class="category-form">
+        <input type="hidden" id="categoryId">
+        
+        <div class="form-group">
+          <label for="categoryName">Category Name</label>
+          <input type="text" id="categoryName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="categoryDescription">Description</label>
+          <textarea id="categoryDescription" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="categoryImage">Image</label>
+          <div class="image-upload">
+            <input type="file" id="categoryImage" accept="image/*">
+            <div id="categoryImagePreview" class="image-preview"></div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" id="saveBtn" class="btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    // same firebaseConfig
+    const firebaseConfig = {
+     apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loadingScreen = document.getElementById("loadingScreen");
+    const mainContent = document.getElementById("mainContent");
+    const errorScreen = document.getElementById("errorScreen");
+    const errorMessage = document.getElementById("errorMessage");
+    const signOutBtn = document.getElementById("signOut");
+    const toastContainer = document.getElementById("toastContainer");
+    const goHomeBtn = document.getElementById("goHome");
+    const categoriesList = document.getElementById("categoriesList");
+    const addCategoryBtn = document.getElementById("addCategoryBtn");
+    const categoryModal = document.getElementById("categoryModal");
+    const closeModalBtn = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const categoryForm = document.getElementById("categoryForm");
+    const modalTitle = document.getElementById("modalTitle");
+
+    let categories = [];
+    let editingCategoryId = null;
+
+    // Toast notification function (same as other pages)
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.parentNode && toast.parentNode.removeChild(toast), 300);
+      }, 3000);
+    }
+
+    // Helper to perform authenticated fetch with ID token and automatic retry on 401
+    async function fetchWithAuth(url, options = {}) {
+      const user = auth.currentUser;
+      if (!user) {
+        window.location.href = "/signin";
+        throw new Error('Not signed in');
+      }
+
+      // Ensure headers object exists
+      options.headers = options.headers || {};
+
+      // Try with current token first
+      try {
+        const idToken = await user.getIdToken(false);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      } catch (err) {
+        // fallback to force refresh
+        const idToken = await user.getIdToken(true);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      }
+
+      let res = await fetch(url, options);
+      if (res.status === 401) {
+        // Try once more with a fresh token
+        try {
+          const fresh = await user.getIdToken(true);
+          options.headers["Authorization"] = "Bearer " + fresh;
+          res = await fetch(url, options);
+        } catch (_) {
+          // ignore inner error and return original response
+        }
+      }
+      return res;
+    }
+
+    goHomeBtn.addEventListener("click", () => window.location.href = "/");
+
+    // Modal controls
+    addCategoryBtn.addEventListener("click", () => openCategoryModal());
+    closeModalBtn.addEventListener("click", () => closeCategoryModal());
+    cancelBtn.addEventListener("click", () => closeCategoryModal());
+
+    // Form submission
+    categoryForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await saveCategory();
+    });
+
+    // Image preview handler
+    document.getElementById("categoryImage").addEventListener("change", (e) => {
+      previewImage(e.target, document.querySelector("#categoryImagePreview"));
+    });
+
+    // Open category modal
+    function openCategoryModal(categoryId = null) {
+      editingCategoryId = categoryId;
+      modalTitle.textContent = categoryId ? "Edit Category" : "Add Category";
+      
+      if (categoryId) {
+        const category = categories.find(c => c.id === categoryId);
+        if (category) {
+          document.getElementById("categoryName").value = category.name || "";
+          document.getElementById("categoryDescription").value = category.description || "";
+          if (category.image) {
+            const preview = document.querySelector("#categoryImagePreview");
+            preview.innerHTML = `<img src="${category.image}" alt="Category Image">`;
+          }
+        }
+      } else {
+        categoryForm.reset();
+        document.querySelector("#categoryImagePreview").innerHTML = "";
+      }
+      
+      categoryModal.style.display = "flex";
+    }
+
+    // Close category modal
+    function closeCategoryModal() {
+      categoryModal.style.display = "none";
+      categoryForm.reset();
+      document.querySelector("#categoryImagePreview").innerHTML = "";
+      editingCategoryId = null;
+    }
+
+    // Preview image
+    function previewImage(input, previewContainer) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => previewContainer.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Save category
+    async function saveCategory() {
+      const formData = new FormData();
+      formData.append("name", document.getElementById("categoryName").value);
+      formData.append("description", document.getElementById("categoryDescription").value);
+      
+      const imageInput = document.getElementById("categoryImage");
+      if (imageInput.files && imageInput.files[0]) {
+        formData.append("image", imageInput.files[0]);
+      }
+      
+      try {
+        const url = editingCategoryId ? `/api/update_category/${editingCategoryId}` : "/api/create_category";
+        const method = editingCategoryId ? "PUT" : "POST";
+
+        const res = await fetchWithAuth(url, { method, body: formData });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to save category: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast(editingCategoryId ? "Category updated successfully" : "Category added successfully", 'success');
+        closeCategoryModal();
+        loadCategories();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    }
+
+    // Delete category
+    async function deleteCategory(categoryId) {
+      if (!confirm("Are you sure you want to delete this category? This might affect products associated with it.")) return;
+      
+      try {
+        const res = await fetchWithAuth(`/api/delete_category/${categoryId}`, { method: "DELETE" });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to delete category: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast("Category deleted successfully", 'success');
+        loadCategories();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    }
+
+    // Load categories
+    async function loadCategories() {
+      categoriesList.innerHTML = '<div class="loading-spinner"></div>';
+      
+      try {
+        const res = await fetchWithAuth("/api/get_categories", { method: "GET" });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to load categories: " + (j.error || res.statusText), 'error');
+          categoriesList.innerHTML = '<div class="error-message">Failed to load categories</div>';
+          return;
+        }
+
+        categories = await res.json();
+        renderCategories();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+        categoriesList.innerHTML = '<div class="error-message">Error loading categories</div>';
+      }
+    }
+
+    // Render categories
+    function renderCategories() {
+      if (!categories || categories.length === 0) {
+        categoriesList.innerHTML = '<div class="empty-message">No categories found</div>';
+        return;
+      }
+
+      let html = '<div class="categories-grid">';
+      categories.forEach(category => {
+        html += `
+          <div class="category-card">
+            <div class="category-image">
+              ${category.image ? 
+                `<img src="${category.image}" alt="${category.name}">` : 
+                '<div class="no-image">No Image</div>'
+              }
+            </div>
+            <div class="category-details">
+              <h3>${category.name}</h3>
+              <p>${category.description || 'No description'}</p>
+            </div>
+            <div class="category-actions">
+              <button class="btn-edit" onclick="openCategoryModal('${category.id}')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button class="btn-delete" onclick="deleteCategory('${category.id}')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      categoriesList.innerHTML = html;
+    }
+
+    // Auth state check (same as other pages)
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "/signin"; return; }
+      try {
+        const res = await fetchWithAuth('/api/get_user', { method: 'GET' });
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          errorMessage.textContent = "Failed to load profile: " + (j.error || res.statusText);
+          loadingScreen.style.display = "none"; errorScreen.style.display = "flex"; return;
+        }
+        const userDoc = await res.json();
+        if (userDoc.role !== 'admin') {
+          errorMessage.textContent = "Access denied: Admin role required";
+          loadingScreen.style.display = "none"; errorScreen.style.display = "flex"; return;
+        }
+        
+        document.querySelector('.admin-name').textContent = userDoc.name || '-';
+        document.querySelector('.admin-email').textContent = userDoc.email || '-';
+        document.querySelector('.admin-name').classList.remove('skeleton');
+        document.querySelector('.admin-email').classList.remove('skeleton');
+        document.querySelector('.avatar-circle').classList.remove('skeleton');
+        document.querySelector('.avatar-circle').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        
+        loadingScreen.style.display = "none";
+        mainContent.style.display = "flex";
+        await loadCategories();
+      } catch (e) {
+        errorMessage.textContent = "Error: " + e.message;
+        loadingScreen.style.display = "none";
+        errorScreen.style.display = "flex";
+      }
+    });
+
+    signOutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      signOutBtn.disabled = true; signOutBtn.classList.add('loading');
+      try {
+        await signOut(auth);
+        showToast("Signed out successfully", 'success');
+        setTimeout(() => window.location.href = "/signin", 1000);
+      } catch (err) {
+        showToast("Sign out error: " + err.message, 'error');
+        signOutBtn.disabled = false; signOutBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

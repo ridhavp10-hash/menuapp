@@ -1,0 +1,670 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Manage Products</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/manage_products.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Loading products...</p>
+  </div>
+  
+  <main id="mainContent" class="glass-card" style="display: none;">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">Manage Products</p>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-avatar">
+        <div class="avatar-circle skeleton"></div>
+      </div>
+      
+      <div class="admin-details">
+        <div class="admin-name skeleton-text skeleton"></div>
+        <div class="admin-email skeleton-text skeleton"></div>
+      </div>
+    </div>
+
+    <div class="products-container">
+      <div class="products-header">
+        <h2>Products</h2>
+        <button id="addProductBtn" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Product
+        </button>
+      </div>
+      
+      <div class="products-list" id="productsList">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/admin" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+       Admin Panel
+      </a>
+      <button id="signOut" class="btn-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="btn-text">Sign out</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </main>
+
+  <div id="errorScreen" class="error-screen" style="display: none;">
+    <div class="error-container">
+      <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h2>Access Denied</h2>
+      <p id="errorMessage">You don't have permission to access this panel.</p>
+      <button id="goHome" class="btn-primary">Go to Home</button>
+    </div>
+  </div>
+
+  <!-- Product Form Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Product</h2>
+        <button id="closeModal" class="close-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <form id="productForm" class="product-form">
+        <input type="hidden" id="productId">
+        
+        <div class="form-group">
+          <label for="productName">Product Name</label>
+          <input type="text" id="productName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="productCategory">Category</label>
+          <select id="productCategory" required>
+            <option value="">Select Category</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="productDescription">Description</label>
+          <textarea id="productDescription" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="productIngredients">Ingredients</label>
+          <textarea id="productIngredients" rows="2"></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="normalPrice">Normal Price</label>
+            <input type="number" id="normalPrice" step="0.01" min="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="offerPrice">Offer Price</label>
+            <input type="number" id="offerPrice" step="0.01" min="0">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productAvailability">Availability</label>
+            <select id="productAvailability">
+              <option value="available">Available</option>
+              <option value="unavailable">Unavailable</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="productFeatured">Featured</label>
+            <select id="productFeatured">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="coverImage">Cover Image</label>
+          <div class="image-upload">
+            <input type="file" id="coverImage" accept="image/*">
+            <div id="coverImagePreview" class="image-preview"></div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Product Images (up to 4)</label>
+          <div class="product-images">
+            <div class="image-upload">
+              <input type="file" class="product-image" accept="image/*">
+              <div class="image-preview"></div>
+            </div>
+            <div class="image-upload">
+              <input type="file" class="product-image" accept="image/*">
+              <div class="image-preview"></div>
+            </div>
+            <div class="image-upload">
+              <input type="file" class="product-image" accept="image/*">
+              <div class="image-preview"></div>
+            </div>
+            <div class="image-upload">
+              <input type="file" class="product-image" accept="image/*">
+              <div class="image-preview"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" id="cancelBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" id="saveBtn" class="btn-primary">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    // same firebaseConfig
+    const firebaseConfig = {
+     apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loadingScreen = document.getElementById("loadingScreen");
+    const mainContent = document.getElementById("mainContent");
+    const errorScreen = document.getElementById("errorScreen");
+    const errorMessage = document.getElementById("errorMessage");
+    const signOutBtn = document.getElementById("signOut");
+    const toastContainer = document.getElementById("toastContainer");
+    const goHomeBtn = document.getElementById("goHome");
+    const productsList = document.getElementById("productsList");
+    const addProductBtn = document.getElementById("addProductBtn");
+    const productModal = document.getElementById("productModal");
+    const closeModalBtn = document.getElementById("closeModal");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const productForm = document.getElementById("productForm");
+    const modalTitle = document.getElementById("modalTitle");
+    const productCategory = document.getElementById("productCategory");
+
+    let products = [];
+    let categories = [];
+    let editingProductId = null;
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Helper to perform authenticated fetch with ID token and automatic retry on 401
+    async function fetchWithAuth(url, options = {}) {
+      const user = auth.currentUser;
+      if (!user) {
+        window.location.href = "/signin";
+        throw new Error('Not signed in');
+      }
+
+      options.headers = options.headers || {};
+
+      try {
+        const idToken = await user.getIdToken(false);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      } catch (err) {
+        const idToken = await user.getIdToken(true);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      }
+
+      let res = await fetch(url, options);
+      if (res.status === 401) {
+        try {
+          const fresh = await user.getIdToken(true);
+          options.headers["Authorization"] = "Bearer " + fresh;
+          res = await fetch(url, options);
+        } catch (_) {
+        }
+      }
+      return res;
+    }
+
+    // Go home button
+    goHomeBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+
+    // Modal controls
+    addProductBtn.addEventListener("click", () => {
+      openProductModal();
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+      closeProductModal();
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      closeProductModal();
+    });
+
+    // Form submission
+    productForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await saveProduct();
+    });
+
+    // Image preview handlers
+    document.getElementById("coverImage").addEventListener("change", (e) => {
+      previewImage(e.target, document.querySelector("#coverImagePreview"));
+    });
+
+    document.querySelectorAll(".product-image").forEach((input, index) => {
+      input.addEventListener("change", (e) => {
+        previewImage(e.target, e.target.nextElementSibling);
+      });
+    });
+
+    // Open product modal
+    function openProductModal(productId = null) {
+      editingProductId = productId;
+      modalTitle.textContent = productId ? "Edit Product" : "Add Product";
+      
+      if (productId) {
+        const product = products.find(p => p.id === productId);
+        if (product) {
+          document.getElementById("productName").value = product.name || "";
+          document.getElementById("productCategory").value = product.categoryId || "";
+          document.getElementById("productDescription").value = product.description || "";
+          document.getElementById("productIngredients").value = product.ingredients || "";
+          document.getElementById("normalPrice").value = product.normalPrice || "";
+          document.getElementById("offerPrice").value = product.offerPrice || "";
+          document.getElementById("productAvailability").value = product.availability || "available";
+          document.getElementById("productFeatured").value = product.featured === true ? "yes" : "no";
+          
+          // Set image previews if they exist
+          if (product.coverImage) {
+            const coverPreview = document.querySelector("#coverImagePreview");
+            coverPreview.innerHTML = `<img src="${product.coverImage}" alt="Cover Image">`;
+          }
+          
+          // Set product images if they exist
+          if (product.images && product.images.length > 0) {
+            const imageInputs = document.querySelectorAll(".product-image");
+            const imagePreviews = document.querySelectorAll(".product-images .image-preview");
+            
+            product.images.forEach((image, index) => {
+              if (index < imageInputs.length) {
+                imagePreviews[index].innerHTML = `<img src="${image}" alt="Product Image ${index + 1}">`;
+              }
+            });
+          }
+        }
+      } else {
+        productForm.reset();
+        document.querySelectorAll(".image-preview").forEach(preview => {
+          preview.innerHTML = "";
+        });
+      }
+      
+      productModal.style.display = "flex";
+    }
+
+    // Close product modal
+    function closeProductModal() {
+      productModal.style.display = "none";
+      productForm.reset();
+      document.querySelectorAll(".image-preview").forEach(preview => {
+        preview.innerHTML = "";
+      });
+      editingProductId = null;
+    }
+
+    // Preview image
+    function previewImage(input, previewContainer) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          previewContainer.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Save product
+    async function saveProduct() {
+      const formData = new FormData();
+      const productId = document.getElementById("productId").value;
+      
+      // Add form fields
+      formData.append("name", document.getElementById("productName").value);
+      formData.append("categoryId", document.getElementById("productCategory").value);
+      formData.append("description", document.getElementById("productDescription").value);
+      formData.append("ingredients", document.getElementById("productIngredients").value);
+      formData.append("normalPrice", document.getElementById("normalPrice").value);
+      formData.append("offerPrice", document.getElementById("offerPrice").value);
+      formData.append("availability", document.getElementById("productAvailability").value);
+      formData.append("featured", document.getElementById("productFeatured").value === "yes" ? "true" : "false");
+      
+      // Add cover image if exists
+      const coverImageInput = document.getElementById("coverImage");
+      if (coverImageInput.files && coverImageInput.files[0]) {
+        formData.append("coverImage", coverImageInput.files[0]);
+      }
+      
+      // Add product images if they exist
+      const productImageInputs = document.querySelectorAll(".product-image");
+      productImageInputs.forEach((input, index) => {
+        if (input.files && input.files[0]) {
+          formData.append(`productImage${index}`, input.files[0]);
+        }
+      });
+      
+      try {
+        const url = editingProductId ? `/api/update_product/${editingProductId}` : "/api/create_product";
+        const method = editingProductId ? "PUT" : "POST";
+
+        const res = await fetchWithAuth(url, { method, body: formData });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to save product: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast(editingProductId ? "Product updated successfully" : "Product added successfully", 'success');
+        closeProductModal();
+        loadProducts();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    }
+
+    // Delete product
+    async function deleteProduct(productId) {
+      if (!confirm("Are you sure you want to delete this product?")) {
+        return;
+      }
+      
+      try {
+        const res = await fetchWithAuth(`/api/delete_product/${productId}`, { method: "DELETE" });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to delete product: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast("Product deleted successfully", 'success');
+        loadProducts();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    }
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const res = await fetchWithAuth("/api/get_categories", { method: "GET" });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to load categories: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        categories = await res.json();
+        
+        // Populate category dropdown
+        productCategory.innerHTML = '<option value="">Select Category</option>';
+        categories.forEach(category => {
+          const option = document.createElement("option");
+          option.value = category.id;
+          option.textContent = category.name;
+          productCategory.appendChild(option);
+        });
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    }
+
+    // Load products
+    async function loadProducts() {
+      productsList.innerHTML = '<div class="loading-spinner"></div>';
+      
+      try {
+        const res = await fetchWithAuth("/api/get_products", { method: "GET" });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to load products: " + (j.error || res.statusText), 'error');
+          productsList.innerHTML = '<div class="error-message">Failed to load products</div>';
+          return;
+        }
+
+        products = await res.json();
+        renderProducts();
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+        productsList.innerHTML = '<div class="error-message">Error loading products</div>';
+      }
+    }
+
+    // Render products
+    function renderProducts() {
+      if (!products || products.length === 0) {
+        productsList.innerHTML = '<div class="empty-message">No products found</div>';
+        return;
+      }
+
+      let html = '<div class="products-grid">';
+      
+      products.forEach(product => {
+        const category = categories.find(c => c.id === product.categoryId);
+        const categoryName = category ? category.name : "Uncategorized";
+        
+        html += `
+          <div class="product-card">
+            <div class="product-image">
+              ${product.coverImage ? 
+                `<img src="${product.coverImage}" alt="${product.name}">` : 
+                '<div class="no-image">No Image</div>'
+              }
+              ${product.featured ? '<div class="featured-badge">Featured</div>' : ''}
+            </div>
+            <div class="product-details">
+              <h3>${product.name}</h3>
+              <p class="product-category">${categoryName}</p>
+              <p class="product-price">
+                ${product.offerPrice && product.offerPrice > 0 ? 
+                  `<span class="offer-price">$${product.offerPrice}</span>
+                   <span class="normal-price">$${product.normalPrice}</span>` : 
+                  `<span class="normal-price">$${product.normalPrice}</span>`
+                }
+              </p>
+              <p class="product-availability ${product.availability === 'available' ? 'available' : 'unavailable'}">
+                ${product.availability === 'available' ? 'Available' : 'Unavailable'}
+              </p>
+            </div>
+            <div class="product-actions">
+              <button class="btn-edit" onclick="openProductModal('${product.id}')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="btn-delete" onclick="deleteProduct('${product.id}')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      productsList.innerHTML = html;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // not signed in
+        window.location.href = "/signin";
+        return;
+      }
+
+      // Get fresh ID token
+      try {
+        const res = await fetchWithAuth('/api/get_user', { method: 'GET' });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          errorMessage.textContent = "Failed to load profile: " + (j.error || res.statusText);
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+
+        const userDoc = await res.json();
+        
+        // Check if user has admin role
+        if (userDoc.role !== 'admin') {
+          errorMessage.textContent = "Access denied: Admin role required";
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+        
+        // Update admin details
+        document.querySelector('.admin-name').textContent = userDoc.name || '-';
+        document.querySelector('.admin-email').textContent = userDoc.email || '-';
+        
+        // Remove skeleton loading
+        document.querySelector('.admin-name').classList.remove('skeleton');
+        document.querySelector('.admin-email').classList.remove('skeleton');
+        document.querySelector('.avatar-circle').classList.remove('skeleton');
+        
+        // Update avatar
+        const avatarCircle = document.querySelector('.avatar-circle');
+        avatarCircle.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        `;
+        
+        // Hide loading screen and show main content
+        loadingScreen.style.display = "none";
+        mainContent.style.display = "flex";
+        
+        // Load categories and products
+        await loadCategories();
+        await loadProducts();
+      } catch (e) {
+        errorMessage.textContent = "Error: " + e.message;
+        loadingScreen.style.display = "none";
+        errorScreen.style.display = "flex";
+      }
+    });
+
+    signOutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      
+      // Set loading state
+      signOutBtn.disabled = true;
+      signOutBtn.classList.add('loading');
+      
+      try {
+        await signOut(auth);
+        showToast("Signed out successfully", 'success');
+        setTimeout(() => window.location.href = "/signin", 1000);
+      } catch (err) {
+        showToast("Sign out error: " + err.message, 'error');
+        // Reset loading state on error
+        signOutBtn.disabled = false;
+        signOutBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

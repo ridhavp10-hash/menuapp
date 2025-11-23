@@ -1,0 +1,441 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>User Management</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/static/css/user_manage.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-container">
+    <div class="overlay"></div>
+  </div>
+  
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Loading user management...</p>
+  </div>
+  
+  <main id="mainContent" class="glass-card" style="display: none;">
+    <div class="card-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <img src="/static/images/logo.png" alt="Logo" style="width:40px;height:40px;">
+        </div>
+        <h1>Menu App</h1>
+      </div>
+      <p class="subtitle">User Management</p>
+    </div>
+
+    <div class="admin-container">
+      <div class="admin-avatar">
+        <div class="avatar-circle skeleton"></div>
+      </div>
+      
+      <div class="admin-details">
+        <div class="admin-name skeleton-text skeleton"></div>
+        <div class="admin-email skeleton-text skeleton"></div>
+      </div>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="users">Users</button>
+        <button class="tab-btn" data-tab="waiters">Waiters</button>
+        <button class="tab-btn" data-tab="kitchen">Kitchen</button>
+      </div>
+      
+      <div class="tab-content">
+        <div id="users" class="tab-pane active">
+          <div class="section-header">
+            <h3>User Management</h3>
+            <p>Manage users without assigned roles</p>
+          </div>
+          <div class="data-container">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        
+        <div id="waiters" class="tab-pane">
+          <div class="section-header">
+            <h3>Waiter Management</h3>
+            <p>Manage restaurant waiters</p>
+          </div>
+          <div class="data-container">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        
+        <div id="kitchen" class="tab-pane">
+          <div class="section-header">
+            <h3>Kitchen Management</h3>
+            <p>Manage kitchen staff</p>
+          </div>
+          <div class="data-container">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a href="/admin" class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+       Admin Panel
+      </a>
+      <button id="signOut" class="btn-logout">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="btn-text">Sign out</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </main>
+
+  <div id="errorScreen" class="error-screen" style="display: none;">
+    <div class="error-container">
+      <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h2>Access Denied</h2>
+      <p id="errorMessage">You don't have permission to access this panel.</p>
+      <button id="goHome" class="btn-primary">Go to Home</button>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module">
+    // same firebaseConfig
+    const firebaseConfig = {
+     apiKey: "AIzaSyAAB177RRF5ds2ADVc6GIxdwJw5najJuWI",
+  authDomain: "restaurants-menu-system.firebaseapp.com",
+  projectId: "restaurants-menu-system",
+  storageBucket: "restaurants-menu-system.firebasestorage.app",
+  messagingSenderId: "801085410696",
+  appId: "1:801085410696:web:2a4e2e94f5fe463f323e3d",
+  measurementId: "G-HTDEV5LL3Z"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loadingScreen = document.getElementById("loadingScreen");
+    const mainContent = document.getElementById("mainContent");
+    const errorScreen = document.getElementById("errorScreen");
+    const errorMessage = document.getElementById("errorMessage");
+    const signOutBtn = document.getElementById("signOut");
+    const toastContainer = document.getElementById("toastContainer");
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const goHomeBtn = document.getElementById("goHome");
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSvg = '';
+      if (type === 'success') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'error') {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSvg}</div>
+        <div class="toast-message">${message}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Go home button
+    goHomeBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+
+    // Helper to perform authenticated fetch with ID token and automatic retry on 401
+    async function fetchWithAuth(url, options = {}) {
+      const user = auth.currentUser;
+      if (!user) {
+        window.location.href = "/signin";
+        throw new Error('Not signed in');
+      }
+
+      options.headers = options.headers || {};
+
+      try {
+        const idToken = await user.getIdToken(false);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      } catch (err) {
+        const idToken = await user.getIdToken(true);
+        options.headers["Authorization"] = "Bearer " + idToken;
+      }
+
+      let res = await fetch(url, options);
+      if (res.status === 401) {
+        try {
+          const fresh = await user.getIdToken(true);
+          options.headers["Authorization"] = "Bearer " + fresh;
+          res = await fetch(url, options);
+        } catch (_) {
+        }
+      }
+      return res;
+    }
+
+    // Tab functionality
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        
+        // Remove active class from all tabs and panes
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding pane
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        
+        // Load data for the active tab
+        loadTabData(tabId);
+      });
+    });
+
+    // Function to load data based on active tab
+    async function loadTabData(tabId) {
+      const container = document.querySelector(`#${tabId} .data-container`);
+      container.innerHTML = '<div class="loading-spinner"></div>';
+      
+      try {
+        let endpoint;
+        if (tabId === 'users') {
+          endpoint = '/api/get_users';
+        } else if (tabId === 'waiters') {
+          endpoint = '/api/get_waiters';
+        } else if (tabId === 'kitchen') {
+          endpoint = '/api/get_kitchen';
+        }
+
+        const res = await fetchWithAuth(endpoint, { method: 'GET' });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to load data: " + (j.error || res.statusText), 'error');
+          container.innerHTML = '<div class="error-message">Failed to load data</div>';
+          return;
+        }
+
+        const data = await res.json();
+        renderData(container, data, tabId);
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+        container.innerHTML = '<div class="error-message">Error loading data</div>';
+      }
+    }
+
+    // Function to render data in the active tab
+    function renderData(container, data, tabId) {
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-message">No data available</div>';
+        return;
+      }
+
+      let html = '<div class="data-table-container"><table class="data-table"><thead><tr>';
+      
+      if (tabId === 'users') {
+        html += '<th>Name</th><th>Email</th><th>Actions</th>';
+      } else if (tabId === 'waiters') {
+        html += '<th>Name</th><th>Email</th><th>Actions</th>';
+      } else if (tabId === 'kitchen') {
+        html += '<th>Name</th><th>Email</th><th>Actions</th>';
+      }
+      
+      html += '</tr></thead><tbody>';
+      
+      data.forEach(item => {
+        html += `<tr>
+          <td>${item.name || '-'}</td>
+          <td>${item.email || '-'}</td>
+          <td class="action-cell">
+            ${tabId === 'users' ? 
+              `<button class="btn-action" onclick="assignRole('${item.uid}', 'waiter')">Make Waiter</button>
+               <button class="btn-action" onclick="assignRole('${item.uid}', 'kitchen')">Make Kitchen</button>` :
+              `<button class="btn-action" onclick="removeRole('${item.uid}')">Remove Role</button>`
+            }
+          </td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+
+    // Function to assign role to a user
+    window.assignRole = async function(uid, role) {
+      try {
+        const res = await fetchWithAuth('/api/assign_role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid, role })
+        });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to assign role: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast("Role assigned successfully", 'success');
+        loadTabData('users');
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    };
+
+    // Function to remove role from a user
+    window.removeRole = async function(uid) {
+      try {
+        const res = await fetchWithAuth('/api/remove_role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid })
+        });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          showToast("Failed to remove role: " + (j.error || res.statusText), 'error');
+          return;
+        }
+
+        showToast("Role removed successfully", 'success');
+        
+        // Reload the active tab
+        const activeTab = document.querySelector('.tab-pane.active').id;
+        loadTabData(activeTab);
+      } catch (e) {
+        showToast("Error: " + e.message, 'error');
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // not signed in
+        window.location.href = "/signin";
+        return;
+      }
+
+      // Get fresh ID token
+      try {
+        const idToken = await user.getIdToken(/* forceRefresh */ true);
+        const res = await fetch("/api/get_user", {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + idToken
+          }
+        });
+
+        if (!res.ok) {
+          const j = await res.json().catch(()=>({error:res.statusText}));
+          errorMessage.textContent = "Failed to load profile: " + (j.error || res.statusText);
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+
+        const userDoc = await res.json();
+        
+        // Check if user has admin role
+        if (userDoc.role !== 'admin') {
+          errorMessage.textContent = "Access denied: Admin role required";
+          loadingScreen.style.display = "none";
+          errorScreen.style.display = "flex";
+          return;
+        }
+        
+        // Update admin details
+        document.querySelector('.admin-name').textContent = userDoc.name || '-';
+        document.querySelector('.admin-email').textContent = userDoc.email || '-';
+        
+        // Remove skeleton loading
+        document.querySelector('.admin-name').classList.remove('skeleton');
+        document.querySelector('.admin-email').classList.remove('skeleton');
+        document.querySelector('.avatar-circle').classList.remove('skeleton');
+        
+        // Update avatar
+        const avatarCircle = document.querySelector('.avatar-circle');
+        avatarCircle.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        `;
+        
+        // Hide loading screen and show main content
+        loadingScreen.style.display = "none";
+        mainContent.style.display = "flex";
+        
+        // Load initial data for the users tab
+        loadTabData('users');
+      } catch (e) {
+        errorMessage.textContent = "Error: " + e.message;
+        loadingScreen.style.display = "none";
+        errorScreen.style.display = "flex";
+      }
+    });
+
+    signOutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      
+      // Set loading state
+      signOutBtn.disabled = true;
+      signOutBtn.classList.add('loading');
+      
+      try {
+        await signOut(auth);
+        showToast("Signed out successfully", 'success');
+        setTimeout(() => window.location.href = "/signin", 1000);
+      } catch (err) {
+        showToast("Sign out error: " + err.message, 'error');
+        // Reset loading state on error
+        signOutBtn.disabled = false;
+        signOutBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>
